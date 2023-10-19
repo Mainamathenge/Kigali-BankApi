@@ -1,30 +1,52 @@
-const swaggerjsDoc = require("swagger-jsdoc");
+import swaggerJSDoc from "swagger-jsdoc";
 
 const options = {
   definition: {
-    openapi:"3.0.0",
+    openapi: "3.0.0",
     info: {
-      title: "Bank of Kigali demo Api",
+      title: "bank of kigali",
       version: "0.1.0",
-      description: "Kyc ",
+      description: "welcome to the well documented gdsc-dekut backend",
     },
     paths: {
-      "/": {
+      "/app": {
         get: {
-          tags: ["App"],
-          description: "Welcome to Api demo",
+          tags: ["app"],
+          description: "the main route",
           responses: {
             200: {
-              description: "welcome to bank of Kigali",
+              description: "user logged in successfully",
+            },
+            404: {
+              description: "user does not exists",
+            },
+            500: {
+              description: "something went wrong",
+            },
+          },
+        },
+      },
+      "/users": {
+        get: {
+          tags: ["app"],
+          description: "get all the users",
+
+          responses: {
+            200: {
+              description: "user logged in successfully",
+            },
+            404: {
+              description: "user does not exists",
+            },
+            500: {
+              description: "something went wrong",
             },
           },
         },
       },
     },
   },
-  apis: ["/app.js"],
+  apis: ["./*/.js"],
 };
 
-const swagger = swaggerjsDoc(options);
-
-module.exports = swagger;
+export const swagger = swaggerJSDoc(options);

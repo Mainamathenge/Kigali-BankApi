@@ -1,4 +1,4 @@
-const users = [
+export const users = [
   {
     id: 1,
     name: "User 1",
@@ -23,6 +23,6 @@ const users = [
   { id: 3, name: "Escrow Account", balance: 0, authToken: "escrowtoken" },
 ];
 
-const transactions = [];
+export const transactions = [];
 
-module.exports = { users, transactions };
+

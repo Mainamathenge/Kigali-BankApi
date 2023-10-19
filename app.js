@@ -1,10 +1,12 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const path = require("path");
-const multer = require("multer");
-const { users, transactions } = require("./mock-data");
-const { swagger } = require("./swagger");
-const swaggerUi = require("swagger-ui-express");
+
+import { swagger } from "./swagger.js";
+import { users, transactions } from "./mock-data.js";
+import swaggerUi from 'swagger-ui-express'
+import multer from "multer";
+import path from "path";
+import bodyParser from "body-parser";
+import express from 'express'
+
 
 const app = express();
 
@@ -43,7 +45,7 @@ var upload = multer({
 
 app.use(bodyParser.json());
 
-app.get("/", (req, res) => {
+app.all("/app", (req, res) => {
   res.json("welcome to bank of Kigali ");
 });
 
