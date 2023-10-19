@@ -1,9 +1,45 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const path = require("path");
+const multer = require("multer");
 const { users, transactions } = require("./mock-data");
+const { swagger } = require("./swagger");
+const swaggerUi = require("swagger-ui-express");
 
 const app = express();
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swagger));
 const port = 3000;
+
+// picture i.e. 1 MB. it is optional
+const maxSize = 1 * 1000 * 1000;
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + "-" + Date.now() + ".pdf");
+  },
+});
+
+var upload = multer({
+  storage: storage,
+  limits: { fileSize: maxSize },
+  fileFilter: function (req, file, cb) {
+    // Set the filetypes to allow PDF files
+    var filetypes = /pdf/;
+    var mimetype = filetypes.test(file.mimetype);
+
+    var extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+
+    cb("Error: File upload only supports PDF files.");
+  },
+}).single("mypic");
 
 app.use(bodyParser.json());
 
@@ -14,6 +50,44 @@ app.get("/", (req, res) => {
 // List all users
 app.get("/users", (req, res) => {
   res.json(users);
+});
+
+//Upload kyc
+
+app.post("/upload/:id", (req, res) => {
+  const kycid = parseInt(req.params.id);
+  console.log(kycid);
+  upload(req, res, (err) => {
+    if (err) {
+      res.status(400).json({ error: err });
+    } else {
+      // File uploaded successfully
+      const updatedStatus = "kyc-uploaded";
+      const user = users.find((user) => user.id === kycid);
+      if (user) {
+        user.kycstatus = updatedStatus;
+      } else {
+        console.log(`User with userid ${kycid} not found.`);
+      }
+      res.status(200).json({ message: "File uploaded successfully" });
+    }
+  });
+});
+
+// approve kyc  || cancel kyc
+
+app.post("/kycstatus/:id", (req, res) => {
+  const kycid = parseInt(req.params.id);
+  const kycstatus = req.body.kycstatus;
+  // console.log(kycid);
+  // console.log(kycstatus);
+  const user = users.find((user) => user.id === kycid);
+  if (user) {
+    user.kycstatus = kycstatus;
+  } else {
+    console.log(`User with userid ${kycid} not found.`);
+  }
+  res.status(200).json({ message: "Kyc updated successfully" });
 });
 
 // generate the users aouthorisation token
@@ -82,7 +156,7 @@ app.post("/transactions", (req, res) => {
 
 app.post("/approve-transaction/:transactionId", (req, res) => {
   const { authToken } = req.body;
-  const transactionId = parseInt(req.params.transactionId); 
+  const transactionId = parseInt(req.params.transactionId);
   const transaction = transactions.find((t) => t.id === transactionId);
 
   // Ensure the transaction exists
